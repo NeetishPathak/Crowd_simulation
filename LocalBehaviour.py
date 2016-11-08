@@ -219,7 +219,7 @@ class localbehaviour(object):
         #self.add_randomnodes()
         #self.generatevoronoi()
         #self.connect_all()
-	#self.connects()
+	    #self.connects()
         #drawmap(self.roadmap)
 	
        

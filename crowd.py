@@ -4,6 +4,7 @@ from Tools import *
 from random import *
 #from LocalBehaviour import *
 from VirtualCity import *
+from math import *
 
 c = 5
 lmax = 20

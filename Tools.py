@@ -130,8 +130,6 @@ class line(object):
 		return str([self.start,self.end])
 
 
-
-
 class graph(object): # based on python-graph library
 	def __init__(self):
 		self.nodes = {}
@@ -185,7 +183,7 @@ class graph(object): # based on python-graph library
 			return
 
 	def deletenode(self, n):
-		#node =(n.x,n.y)
+		node =(n.x,n.y)
 		for each in list(self.get_neighbors(node)):
 			self.deleteedge(each, node)
 			del(self.nodes[node])
@@ -258,10 +256,10 @@ class graph(object): # based on python-graph library
 
 
 if __name__ == '__main__':     
-	node1 = vector(0,0,0)
-	node2 = vector(2,0,0)
-	node3 = vector(0,0,-1)
-	node4 = vector(2,0,2)
+	node1 = vector(0,0)#vector(0,0,0)
+	node2 = vector(0,1)#vector(2,0,0)
+	node3 = vector(1,0)#vector(0,0,-1)
+	node4 = vector(1,1)#vector(2,0,2)
 	nodes = [node1,node2,node3,node4]
 	my = graph()
 	my.addnodes(nodes)
@@ -272,8 +270,8 @@ if __name__ == '__main__':
 	print angleVec(node3,node4)
 	p = perpendicular(node2-node4)
 	print p
-	print angleVec(p,vector(1,0,1))
-	print node1==vector(0,0,1e-16)
+	print angleVec(p,vector(1,0))#vector(1,0,1)
+	print node1==vector(0,0)#vector(0,0,1e-16)
 	print line(node1,node2)
 
 

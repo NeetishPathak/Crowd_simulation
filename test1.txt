@@ -1,0 +1,85 @@
+
+building  300.0  75.0 75 50 Block1
+building  300.0  175.0 50 50 Block2
+building  375.0  75.0 150 75 Block3
+building  300.0  275.0 200 75 Block4
+building  400.0  275.0 200 100 Block5
+building  300.0  500.0 100 100 Block6
+building  425.0  500.0 100 75 Block7
+building  550.0  525.0 75 250 Block8
+building  550.0  275.0 200 100 Block9
+triangle  700.0  275.0 700.0 475.0 775.0 475.0
+triangle  600.0  0.0 600.0 225.0 675.0 225.0
+triangle  750.0 0.0 1000.0 0 1000.0 600.0
+polygon   675.0 0.0 750.0 0.0 1000.0 600.0 925.0 600.0 River
+polygon   787.0 25.0 900.0 25.0 900.0 175.0 850.0 175.0 Market
+obstacle  525.0 250.0 75.0 road
+obstacle  525.0 250.0 25.0 circle
+building  0.0  25.0 50 100 Home
+building  0.0  100.0 50 100 Home
+building  0.0  175.0 50 100 Home
+building  125.0  25.0 50 100 Home
+building  125.0  100.0 50 100 Home
+building  125.0  175.0 50 100 Home
+building  0.0  275.0 200 100 Park
+building  0.0  500.0 100 225 Street
+building  125.0  275.0 75 100 Pool
+building  0.0  525.0 50 50 Home
+building  75.0  525.0 50 50 Home
+building  150.0  525.0 50 50 Home
+building  125.0  375.0 100 100 Gym
+building  325.0  100.0 100 75 Hospital
+building  325.0  325.0 125 150 Office
+building  325.0  500.0 75 75 Office
+building  425.0  500.0 75 50 Office
+building  575.0  325.0 100 50 Hostel
+building  600.0  450.0 125 150 College
+building  475.0  125.0 50 100 Restaurant
+building  475.0  0.0 100 100 Mall
+building  600.0 25.0 200 25 Pub
+building  650.0 0.0 25 125 Bridge
+building  850.0 475.0 25 125 Bridge
+building 950.0 250.0 100 50 Home
+building 950.0 125.0 100 50 Home
+building 950.0 0.0 100 50 Home
+road      600  0.0 25 75 5
+agent  2.0  2.0 0.273735714978
+agent  38.0  3.0 0.271000660564
+agent  20.0  38.0 0.344191782153
+agent  39.0  20.0 0.333299795407
+poi 25.0 500.0 1 home1
+poi 75.0 500.0 2 home2
+poi 175.0 500.0 3 home3
+poi 75.0 350.0 4 home4
+poi 25.0 275.0 5 home5
+poi 125.0 375.0 6 gym
+poi 125.0 325.0 7 pool
+poi 0.0 175.0 8 home6
+poi 125.0 175.0 9 home7
+poi 0.0 100.0 10 home8
+poi 125.0 100.0 11 home9
+poi 0.0 25.0 12 home10
+poi 125.0 25.0 13 home11
+poi 375.0 525.0 14 office1
+poi 425.0 525.0 15 office2
+poi 375.0 425.0 16 office3
+poi 375.0 325.0 17 office4
+poi 350.0 175.0 18 hospital1
+poi 325.0 150.0 19 hospital2
+poi 350.0 100.0 20 hospital3
+poi 550.0 125.0 21 restaurant
+poi 475.0 0.0 22 mall1
+poi 525.0 75.0 23 mall2
+poi 600.0 25.0 24 pub
+poi 625.0 350.0 25 hostel
+poi 600.0 500.0 26 college1
+poi 650.0 450.0 27 college2
+poi 725.0 475.0 28 college3
+poi 850.0 475.0 29 bridge1
+poi 950.0 475.0 30 bridge1
+poi 650.0 0.0 31 bridge2
+poi 750.0 0.0 32 bridge2
+poi 875.0 25.0 33 market
+poi 950.0 0.0 34 home12
+poi 950.0 125.0 35 home12
+poi 950.0 250.0 36 home12

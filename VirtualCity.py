@@ -57,7 +57,6 @@ class building():
             li = line(self.border[i],self.border[(i+1)%len(self.border)])
             self.line.append(li)
 
-
         try:
             if draw:
               f=open(settingspath,'a')
@@ -87,11 +86,11 @@ class agent():
         agents.append(self)
 
         id = agents.index(self)
-        self.maingoal = objects[0]
-        self.path = []
-        #self.bmotion = basicmotion(id,pos,rad,color)
+        self.maingoal = objects[0] #Go to an object like building etc.
+        self.path = [] #Path of the agent
+#         self.bmotion = basicmotion(id,pos,rad,color)
         self.lbehaviour = localbehaviour()
-        #self.gbehaviour = globalbehaviour()
+#         self.gbehaviour = globalbehaviour()
         
         try:
             f=open(settingspath,'a')
@@ -116,13 +115,12 @@ class agent():
             print self.path
             if len(self.path)==0:
                 self.path = [self.maingoal.position]
-            self.bmotion.goals = self.path
+#             self.bmotion.goals = self.path
 
         if self.maingoal.classv=="agent":
             self.bmotion.goals = [self.maingoal.position]
-
-        self.bmotion.update_position()
-        self.gbehaviour.updatestates()
-        self.position = self.bmotion.position
-        self.velocity = self.bmotion.velocity
+#         self.bmotion.update_position()
+#         self.gbehaviour.updatestates()
+#         self.position = self.bmotion.position
+#         self.velocity = self.bmotion.velocity
 
