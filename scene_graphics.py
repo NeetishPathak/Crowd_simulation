@@ -1,8 +1,25 @@
 import time
 from graphics import *
 
-settingspath = os.getcwd() + '/test2.txt'
-# settingspath = os.getcwd() + '/test1.txt'
+testModel = 1
+
+if testModel == 1:
+    settingspath = os.getcwd() + '/test1.txt'
+    # settingspath = os.getcwd() + '/test1.txt'
+    WIDTH = 1000
+    HEIGHT = 600
+    BLOCK_DIM = 25
+    COORDS_X = 1000
+    COORDS_Y = 600
+elif testModel == 2:
+    settingspath = os.getcwd() + '/test2.txt'
+    # settingspath = os.getcwd() + '/test1.txt'
+    WIDTH = 400
+    HEIGHT = 400
+    BLOCK_DIM = 5
+    COORDS_X = 40
+    COORDS_Y = 40
+
 framepath = os.getcwd() + '/frame.txt'
 
 agent = []
@@ -27,23 +44,64 @@ def traverserMatrixDP(matrix):
 #     for i in range(0,x):
 #         cost.append(rowX)
 #     print cost
-    cost = [[0]*len(matrix[0]) for i in range(len(matrix[0]))]
-    print cost
-    print n
-    routes = [[0]*len(matrix[0]) for i in range(len(matrix[0]))]
+    cost = [[0]*x for i in range(x)]
     
-    for row in range(len(matrix[0])):
-        route = []
-        for i in range(row):
-            route.append(i)
-#         routes[row] = 
-    
-    for i in range(0,len(matrix[0])):
-        for j in range(0,len(matrix[0])):
-            if(i==0 or j==0):
-                cost[i][j] = 1
+#     print cost
+    routes = [[[]]*x for i in range(x)]
+#     print routes
+    i = 0
+#     route = []
+#     for j in range(x):
+#         d = matrix[i][j]
+#         print i,j
+#         routes[i][j] = str(d['id']) 
+#     route.append(i)
+# #         routes[row] = 
+
+    for i in range(0,x):
+        for j in range(0,x):
+            d = matrix[i][j]
+            if(d["traversable"] == False):
+                cost[i][j] = 0
+                routes[i][j].append(str("null"))
             else:
-                cost[i][j] = (cost[i-1][j]+cost[i][j-1])
+                if(i==0 or j==0):
+                    cost[i][j] = 1
+#                     routeList = routes[i][j]
+                    
+                    if i==j:
+                        routes[i][j].append(str(d["id"]))
+                    elif i==0:
+                        y = routes[i][j-1]
+                        routes[i][j] = []
+                        routes[i][j].append(y[0] + str(" ") + str(d["id"]))
+                    else:
+                        y = routes[i-1][j]
+                        routes[i][j] = []
+                        routes[i][j].append(y[0] + str(" ") +  str(d["id"]))
+                    
+                else:
+                    cost[i][j] = (cost[i-1][j]+cost[i][j-1]+cost[i-1][j-1])
+                    cur_set = []
+                    for cnt in range(len(routes[i-1][j])):
+                        l = routes[i-1][j]
+                        tempSt = l[cnt]
+                        new_x = tempSt + str(" ") + str(d["id"])
+                        cur_set.append(new_x)
+                        
+                    for cnt in range(len(routes[i][j-1])):
+                        l = routes[i][j-1]
+                        tempSt = l[cnt]
+                        new_x = tempSt + str(" ") + str(d["id"])
+                        cur_set.append(new_x)
+                       
+                    for cnt in range(len(routes[i-1][j-1])):
+                        l = routes[i-1][j-1]
+                        tempSt = l[cnt]
+                        new_x = tempSt + str(" ") + str(d["id"])
+                        cur_set.append(new_x)
+                    routes[i][j] = cur_set
+    print routes
     print cost
     
 
@@ -138,9 +196,9 @@ def draw_graphics():
     print "graphics library"
     positions=[]
 #     window=GraphWin("Crowd Simulation",width=1200, height=600)
-    window=GraphWin("Crowd Simulation",width=400, height=400)
+    window=GraphWin("Crowd Simulation",width=WIDTH, height=HEIGHT)
     window.setBackground('#636363')
-    window.setCoords(0,0,40,40)
+    window.setCoords(0,0,COORDS_X,COORDS_Y)
 
     for a in agent:
         val = Circle( Point(a[0][0],a[0][1]), a[0][2]-0.1)
@@ -245,14 +303,17 @@ def draw_graphics():
         o.append(val)
     for poi in POI:
         poi1 = Point(poi[0][0], poi[0][1])
-        poi2 = Point(poi[0][0] + 5, poi[0][1] + 5)
+        poi2 = Point(poi[0][0] + BLOCK_DIM, poi[0][1] + BLOCK_DIM)
         rct_poi = Rectangle(poi1,poi2)
         rct_poi.setFill("Red")
         rct_poi.draw(window)
         text = Text(rct_poi.getCenter(),poi[0][2])
         text.setSize(8)
         text.draw(window)
+    
+    
     matrix = []
+    
     for x in range(0,40,5):
         m1 = []
         for y in range(0,40,5):
@@ -269,17 +330,28 @@ def draw_graphics():
         for j in range(0,8):
             print str(matrix[i][j])  + " ",
         print "\n"
-    dim = 4
+        
+    #Test Matrix for all the paths from top left corner to botton right corner
+    dim = 7
     a = []
+    i = 0;
     for l in range(0,dim):
         b = []
         for m in range(0,dim):
-            b.append(l*dim+m)
+            trav = True
+            a_set = set([6,7])
+            if i in a_set:
+                trav = False
+            else:
+                trav = True    
+            d = {'val':l*dim+m,'traversable':trav,"id":l*dim+m}
+            b.append(d)
+            i += 1
         a.append(b)
         
-    print a
+#     print a
     path = []
-    traverSeMatrix(a,0,0,dim,dim,path)       
+#     traverSeMatrix(a,0,0,dim,dim,path)       
     traverserMatrixDP(a)
     
             
