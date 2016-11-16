@@ -1,0 +1,13 @@
+
+building  5.0  25.0 10 10 Hotel
+building  20.0  5.0 10 10 School
+building  5.0  10.0 10 5 Pub
+building  30.0  35.0 5 5 Office
+poi 5.0 25.0 1 Hotel
+poi 25.0 10.0 2 School
+poi 5.0 5.0 3 Pub
+poi 35.0 35.0 4 Office
+agent  2.0  2.0 0.273735714978
+agent  38.0  3.0 0.271000660564
+agent  20.0  38.0 0.344191782153
+agent  39.0  20.0 0.333299795407

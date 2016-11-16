@@ -4,9 +4,26 @@ import math
 import random
 from graphics import *
 
-settingspath = os.getcwd() + '/test2.txt'
-# settingspath = os.getcwd() + '/test1.txt'
-framepath = os.getcwd() + '/frame.txt'
+testSetting = 1
+gridsOn = 0
+if testSetting == 1:
+    settingspath = os.getcwd() + '/test1.txt'
+    # settingspath = os.getcwd() + '/test1.txt'
+    framepath = os.getcwd() + '/frame.txt'
+    griDim = 25
+    WIDTH = 1000
+    HEIGHT = 600
+    COORDS_X = 1000
+    COORDS_Y = 600
+else:
+    settingspath = os.getcwd() + '/test2.txt'
+    # settingspath = os.getcwd() + '/test1.txt'
+    framepath = os.getcwd() + '/frame.txt'
+    griDim = 5
+    WIDTH = 400
+    HEIGHT = 400
+    COORDS_X = 40
+    COORDS_Y = 40
 
 class Grid:
     def __init__(self, width, height, nodeSize, nodeGap, window):
@@ -34,9 +51,11 @@ class Grid:
         for i in range(self.width):
             row = []
             for j in range(self.height):
-                x = (i*self.nodeSize)+((i+1)*self.nodeGap)
-                y = (j*self.nodeSize)+((j+1)*self.nodeGap)
-
+#                 x = (i*self.nodeSize)+((i+1)*self.nodeGap)
+#                 y = (j*self.nodeSize)+((j+1)*self.nodeGap)
+                
+                x = i*griDim
+                y = j*griDim
                 # color start/end/obstacle blocks differently
                 if (i+1, j+1) == self.start:
                     color = "red"
@@ -45,7 +64,7 @@ class Grid:
                 elif (i+1, j+1) in self.blocks:
                     color = "black"
                 else:
-                    color = "white"
+                    color = "#636363"
 
                 node = Node(x, y, self.nodeSize, self.window, color, i, j)
                 row.append(node)
@@ -105,11 +124,12 @@ class Grid:
     def draw_graphics(self):
         print "graphics library"
         positions=[]
-        self.window.setCoords(0,0,480,480)
+
+#         self.window.setCoords(0,0,480,480)
         for a in self.agent:
-            x = a[0][0] * 10 + a[0][0] * self.nodeGap
-            y = a[0][1] * 10 + a[0][1] * self.nodeGap
-            z = a[0][2]*10 - 0.1
+            x = a[0][0]
+            y = a[0][1]
+            z = a[0][2] - 0.1
             val = Circle( Point(x,y), z)
             val.setFill("red")
             positions.append([x,y])
@@ -143,30 +163,40 @@ class Grid:
             p.append(poly)
         
         for a in self.building:
-            x = a[0][0] * 10 + a[0][0] * self.nodeGap
-            y = a[0][1] * 10 + a[0][1] * self.nodeGap
-            z = a[0][3] * 10 + a[0][3] * self.nodeGap
-            w = a[0][2] * 10 + a[0][2] * self.nodeGap
-
-            p1 = int(a[0][0]/5) 
-            p2 = int(a[0][1]/5) 
+#             x = a[0][0] * 10 + a[0][0] * self.nodeGap
+#             y = a[0][1] * 10 + a[0][1] * self.nodeGap
+#             z = a[0][3] * 10 + a[0][3] * self.nodeGap
+#             w = a[0][2] * 10 + a[0][2] * self.nodeGap
+            
+            p1 = int(a[0][0]/griDim) 
+            p2 = int(a[0][1]/griDim) 
             
             self.blocks.append((p1,p2))
-            h = a[0][3]
-            l = a[0][2]
+            l = a[0][3]
+            h = a[0][2]
+            print p1, p2
+            print l, h
+            itr1 = 0
+            while(l>=griDim):
+#                 self.blocks.append((p1+itr1,p2))
+                itr2 = 0
+                h = a[0][2]
+                while(h>=griDim):
+                    self.blocks.append((p1+itr1,p2+itr2))
+#                     print "blocking ", p1+itr1,p2+itr2
+#                     print "l,h ",l,h
+                    itr2 += 1
+                    h -=griDim
+                itr1 += 1
+                l -= griDim
+
+            bd1 = Point(a[0][0], a[0][1])
+#           bd2 = Point(a[0][0], a[0][1] + a[0][2])
+            bd3 = Point(a[0][0] + a[0][3], a[0][1] + a[0][2])
             
-            while(l>5):
-                self.blocks.append((p1,p2+1))
-                l -= 5
-            while(h>5):
-                self.blocks.append((p1+1,p2))
-                self.blocks.append((p1+1,p2+1))
-                h -= 5
-            
-            
-            bd1 = Point(x, y)
+#             bd1 = Point(x, y)
     #         bd2 = Point(a[0][0], a[0][1] + a[0][2])
-            bd3 = Point(x + z, y + w)
+#             bd3 = Point(x + z, y + w)
     #         bd4 = Point(a[0][0] + a[0][3], a[0][1])
 
             #Line(bd1,bd2).draw(window)
@@ -233,10 +263,12 @@ class Grid:
             o.append(val)
             
         for poi in self.POI:
-            x = poi[0][0] * 10 + poi[0][0] * self.nodeGap
-            y = poi[0][1] * 10 + poi[0][1] * self.nodeGap
-            poi1 = Point(x,y)
-            poi2 = Point(x + self.nodeSize, y + self.nodeSize)
+#             x = poi[0][0] * 10 + poi[0][0] * self.nodeGap
+#             y = poi[0][1] * 10 + poi[0][1] * self.nodeGap
+            poi1 = Point(poi[0][0], poi[0][1])
+            poi2 = Point(poi[0][0] + griDim, poi[0][1] + griDim)
+#             poi1 = Point(x,y)
+#             poi2 = Point(x + self.nodeSize, y + self.nodeSize)
             rct_poi = Rectangle(poi1,poi2)
             rct_poi.setFill("Red")
             rct_poi.draw(self.window)
@@ -244,20 +276,22 @@ class Grid:
             text.setSize(8)
             text.draw(self.window)
         print self.blocks   
+        
         matrix = []
-        for i in range(0,8):
+        for i in range(0,COORDS_X,griDim):
             m1 = []
-            for j in range(0,8):
-                x = (i*self.nodeSize)+((i+1)*self.nodeGap)
-                y = (j*self.nodeSize)+((j+1)*self.nodeGap)
+            for j in range(0,COORDS_Y,griDim):
+                x = i
+                y = j
+                m1.append((x*(COORDS_X/griDim) + y)/griDim)
                 
-                m1.append((x*8 + y)/5)
-                rP = Rectangle(Point(x,y),Point(x + self.nodeSize,y + self.nodeSize))
-                rP.setOutline("black")
-                rP.draw(self.window)
-                t = Text(rP.getCenter(),(i*8 + j))
-                t.setSize(8)
-                t.draw(self.window)
+                if gridsOn == 1:
+                    rP = Rectangle(Point(x,y),Point(x + griDim,y + griDim))
+                    rP.setOutline("white")
+                    rP.draw(self.window)
+                    t = Text(rP.getCenter(),(i*(COORDS_X/griDim) + j)/griDim)
+                    t.setSize(8)
+                    t.draw(self.window)
             matrix.append(m1)
 
     def AlternatePath(self,path):
@@ -479,22 +513,24 @@ class Node:
 
 def main():
     # size in terms of # of nodes
-    gridWidth = 40
-    gridHeight = 40
+    gridWidth = WIDTH
+    gridHeight = HEIGHT
     # size of each node in pixels
     nodeSize = 10
     # gap between each node in pixels
     gap = 2
     # subtracting 5px just makes it look nicer
-    screenWidth = (gridWidth * nodeSize) + ((gridWidth ) * gap) 
+    screenWidth = (gridWidth * nodeSize) 
     screenHeight = (gridHeight * nodeSize) + ((gridHeight ) * gap) 
-
+    print screenHeight
+    print screenWidth
     # create window
-    window = GraphWin("A* Simulation", screenWidth, screenHeight, autoflush=False)
-    window.setBackground("#D3D3D3")
-    window.flush()
+    window = GraphWin("A* Simulation", WIDTH, HEIGHT, autoflush=False)
+    window.setBackground("#636363")
+    window.setCoords(0,0,COORDS_X,COORDS_Y)
+#     window.flush()
 
-    grid = Grid(gridWidth/5, gridHeight/5, nodeSize*5.75, gap, window)
+    grid = Grid(COORDS_X/griDim, COORDS_Y/griDim, griDim, gap, window)
     #grid.start = (1,5)
     #grid.end = (30,5)
     grid.draw()
@@ -507,5 +543,6 @@ def main():
             for node in row:
                 node.changeColor("red")
         window.flush()
+    window.getMouse();
 
 main()
