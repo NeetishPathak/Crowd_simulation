@@ -45,7 +45,7 @@ class Grid:
         self.start = ''
         self.end = ''
         self.blocks = []
-
+        self.poiList = []
 
     def draw(self):
         for i in range(self.width):
@@ -150,13 +150,17 @@ class Grid:
             p2 = Point(p[0][2],p[0][3])
             p3 = Point(p[0][4],p[0][5])
             p4 = Point(p[0][6],p[0][7])
+            
+            
             cent_x = (p[0][0] + p[0][2] + p[0][4] + p[0][6])/4.0
             cent_y = (p[0][1] + p[0][3] + p[0][5] + p[0][7])/4.0
             poly = Polygon(p1,p2,p3,p4)
-            poly.setFill("#bf78ce")
+#             poly.setFill("#bf78ce")
+            poly.setFill("gray")
             poly.draw(self.window)
             if p[0][8] == "River":
                 poly.setFill("#99d8c9")
+                
             text = Text(Point(cent_x,cent_y),p[0][8])
             text.setSize(8)
             text.draw(self.window)
@@ -167,28 +171,28 @@ class Grid:
 #             y = a[0][1] * 10 + a[0][1] * self.nodeGap
 #             z = a[0][3] * 10 + a[0][3] * self.nodeGap
 #             w = a[0][2] * 10 + a[0][2] * self.nodeGap
-            
-            p1 = int(a[0][0]/griDim) 
-            p2 = int(a[0][1]/griDim) 
-            
-            self.blocks.append((p1,p2))
-            l = a[0][3]
-            h = a[0][2]
-            print p1, p2
-            print l, h
-            itr1 = 0
-            while(l>=griDim):
-#                 self.blocks.append((p1+itr1,p2))
-                itr2 = 0
+            if(a[0][4] != "bridge"):
+                p1 = int(a[0][0]/griDim) 
+                p2 = int(a[0][1]/griDim) 
+    #             self.blocks.append((p1,p2))
+                l = a[0][3]
                 h = a[0][2]
-                while(h>=griDim):
-                    self.blocks.append((p1+itr1,p2+itr2))
-#                     print "blocking ", p1+itr1,p2+itr2
-#                     print "l,h ",l,h
-                    itr2 += 1
-                    h -=griDim
-                itr1 += 1
-                l -= griDim
+                print p1, p2
+                print l, h
+                itr1 = 0
+                while(l>=griDim):
+    #                 self.blocks.append((p1+itr1,p2))
+                    itr2 = 0
+                    h = a[0][2]
+                    while(h>=griDim):
+    #                     if (p1+itr1,p2+itr2) not in self.poiList:
+                        self.blocks.append((p1+itr1,p2+itr2))
+    #                     print "blocking ", p1+itr1,p2+itr2
+    #                     print "l,h ",l,h
+                        itr2 += 1
+                        h -=griDim
+                    itr1 += 1
+                    l -= griDim
 
             bd1 = Point(a[0][0], a[0][1])
 #           bd2 = Point(a[0][0], a[0][1] + a[0][2])
@@ -269,6 +273,9 @@ class Grid:
             poi2 = Point(poi[0][0] + griDim, poi[0][1] + griDim)
 #             poi1 = Point(x,y)
 #             poi2 = Point(x + self.nodeSize, y + self.nodeSize)
+            '''If point is a point of interest, then it should not be blocked'''
+            self.poiList.append((poi[0][0],poi[0][1]))
+            
             rct_poi = Rectangle(poi1,poi2)
             rct_poi.setFill("Red")
             rct_poi.draw(self.window)
@@ -465,8 +472,8 @@ class Grid:
         current = endNode.getParent()
         
         while current.getParent():
-            current.changeColor("yellow")
-            time.sleep(0.2)
+            current.changeColor("black")
+            time.sleep(0.1)
             self.window.flush()
             current = current.getParent()
         
@@ -488,6 +495,7 @@ class Node:
 
     def draw(self):
         node = Rectangle(Point(self.x, self.y), Point(self.x + self.size, self.y + self.size))
+#         node = Circle(Point(self.x, self.y),0.4)
         node.setFill(self.color)
         node.setOutline(self.color)
         node.draw(self.window)
@@ -505,7 +513,8 @@ class Node:
         return(self.parent)
 
     def changeColor(self, newColor):
-        node = Rectangle(Point(self.x, self.y), Point(self.x + self.size, self.y + self.size))
+#         node = Rectangle(Point(self.x, self.y), Point(self.x + self.size, self.y + self.size))
+        node = Circle(Point((2*self.x + self.size)/2, (2*self.y + self.size)/2),3.0)
         node.setFill(newColor)
         node.setOutline(newColor)
         node.draw(self.window)
@@ -535,8 +544,11 @@ def main():
     #grid.end = (30,5)
     grid.draw()
 
-    if grid.findPath((8,1),(4,7),[]):
-        print("Path Successful")
+    if grid.findPath((16,13),(1,1),[]):
+        if grid.findPath((20,1),(28,18),[]):
+                if grid.findPath((4,21),(24,1),[]):
+                    if grid.findPath((31,1),(38,10),[]):
+                        print("Path Successful")
     else:
         print("Path Not Found")
         for row in grid.nodes:
