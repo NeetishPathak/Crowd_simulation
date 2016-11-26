@@ -4,8 +4,11 @@ import math
 import random
 from graphics import *
 
+globalTime = 0
+globalTick = 0
 testSetting = 1
 gridsOn = 0
+
 if testSetting == 1:
     settingspath = os.getcwd() + '/test1.txt'
     # settingspath = os.getcwd() + '/test1.txt'
@@ -26,6 +29,7 @@ else:
     COORDS_Y = 40
 
 class Grid:
+    femtocells = []
     def __init__(self, width, height, nodeSize, nodeGap, window):
         self.opened = []
         self.closed = []
@@ -46,7 +50,64 @@ class Grid:
         self.end = ''
         self.blocks = []
         self.poiList = []
-
+        self.srcDest = []
+        self.routes = []
+        self.clock = Rectangle(Point(900,525),Point(900+50,525+50))
+        self.timeString = "00:00"
+        self.time = Text(self.clock.getCenter(),self.timeString)
+        
+    def flushRoutes(self):
+        for x in self.routes:
+            for p in x:
+                self.blocks.remove(p)
+    
+    def markFemtocellRegion(self,poi):
+        x = poi[0]/griDim
+        y = poi[1]/griDim
+        Grid.femtocells.append((x,y))
+        Grid.femtocells.append((x-1,y-1))
+        Grid.femtocells.append((x,y-1))
+        Grid.femtocells.append((x+1,y-1))
+        Grid.femtocells.append((x-1,y))
+        Grid.femtocells.append((x+1,y))
+        Grid.femtocells.append((x-1,y+1))
+        Grid.femtocells.append((x,y+1))
+        Grid.femtocells.append((x+1,y+1))
+    
+    def updateClock(self,val):
+        global globalTick
+        global globalTime
+        if globalTick == 12:
+            globalTime += 1
+            globalTick = 0
+        globalTime += val
+#         if(globalTime >= 24):
+#             globalTime = 0
+        self.timeString = str(globalTime) + ":00"
+        self.time.setText(self.timeString)
+            
+    def drawClock(self):
+        self.clock.setFill("yellow")
+        self.clock.draw(self.window)
+        self.time.draw(self.window)
+            
+    def blockRiver(self):
+        x1 = 28
+        x2 = 31
+        for j in range(0,24,3):
+                
+            for i in range(x1,x2): 
+                self.blocks.append((i,j))
+                self.blocks.append((i,j+1))
+                self.blocks.append((i,j+2))
+            x1 += 1
+            if j > 3 and j < 9:
+                x2 += 2
+            else:
+                x2 += 1
+            self.blocks.append((28,4))
+            self.blocks.append((28,3))
+        
     def draw(self):
         for i in range(self.width):
             row = []
@@ -87,7 +148,8 @@ class Grid:
             y = float(line[2])
             if line[0]=="poi":
                 num = line[3]
-                self.POI.append([[x,y,num]])
+                name = line[4]
+                self.POI.append([[x,y,num,name]])
             if line[0]=="agent":
                 rad = float(line[3])
                 self.agent.append([[x,y,rad]])
@@ -122,7 +184,6 @@ class Grid:
         self.draw_graphics()
 
     def draw_graphics(self):
-        print "graphics library"
         positions=[]
 
 #         self.window.setCoords(0,0,480,480)
@@ -159,6 +220,7 @@ class Grid:
             poly.setFill("gray")
             poly.draw(self.window)
             if p[0][8] == "River":
+                self.blockRiver()
                 poly.setFill("#99d8c9")
                 
             text = Text(Point(cent_x,cent_y),p[0][8])
@@ -171,14 +233,14 @@ class Grid:
 #             y = a[0][1] * 10 + a[0][1] * self.nodeGap
 #             z = a[0][3] * 10 + a[0][3] * self.nodeGap
 #             w = a[0][2] * 10 + a[0][2] * self.nodeGap
-            if(a[0][4] != "bridge"):
+            if(a[0][4] != "Street"):
                 p1 = int(a[0][0]/griDim) 
                 p2 = int(a[0][1]/griDim) 
     #             self.blocks.append((p1,p2))
                 l = a[0][3]
                 h = a[0][2]
-                print p1, p2
-                print l, h
+#                 print p1, p2
+#                 print l, h
                 itr1 = 0
                 while(l>=griDim):
     #                 self.blocks.append((p1+itr1,p2))
@@ -186,14 +248,18 @@ class Grid:
                     h = a[0][2]
                     while(h>=griDim):
     #                     if (p1+itr1,p2+itr2) not in self.poiList:
-                        self.blocks.append((p1+itr1,p2+itr2))
-    #                     print "blocking ", p1+itr1,p2+itr2
-    #                     print "l,h ",l,h
+                        if(a[0][4] != "Bridge"):
+                            self.blocks.append((p1+itr1,p2+itr2))
+    #                         print "blocking ", p1+itr1,p2+itr2
+    #                         print "l,h ",l,h
+                        else:
+                            if (p1+itr1,p2+itr2) in self.blocks:
+                                self.blocks.remove((p1+itr1,p2+itr2))
                         itr2 += 1
                         h -=griDim
                     itr1 += 1
                     l -= griDim
-
+                    
             bd1 = Point(a[0][0], a[0][1])
 #           bd2 = Point(a[0][0], a[0][1] + a[0][2])
             bd3 = Point(a[0][0] + a[0][3], a[0][1] + a[0][2])
@@ -210,7 +276,7 @@ class Grid:
             
             rect = Rectangle(bd1,bd3)
             if "College" == str(a[0][4]):
-                color = 'Brown'
+                color = '#fdae6b'
             elif 'Hospital' == str(a[0][4]):
                 color = 'Blue'
             elif "Forest" == str(a[0][4]):
@@ -277,12 +343,19 @@ class Grid:
             self.poiList.append((poi[0][0],poi[0][1]))
             
             rct_poi = Rectangle(poi1,poi2)
-            rct_poi.setFill("Red")
-            rct_poi.draw(self.window)
-            text = Text(rct_poi.getCenter(),poi[0][2])
+            if int(poi[0][2]) <= 31:
+                rct_poi.setFill("Red")
+                rct_poi.draw(self.window)
+                text = Text(rct_poi.getCenter(),poi[0][2])
+                self.srcDest.append(poi[0])
+            else:
+                rct_poi.setFill("#e0ecf4")
+                rct_poi.draw(self.window)
+                text = Text(rct_poi.getCenter(),poi[0][3])
+                self.markFemtocellRegion(poi[0])
             text.setSize(8)
             text.draw(self.window)
-        print self.blocks   
+#         print self.blocks   
         
         matrix = []
         for i in range(0,COORDS_X,griDim):
@@ -339,7 +412,7 @@ class Grid:
                     path1.append(data)
                     node = node.getParent()
                 #path.pop()
-                print path1
+#                 print path1
                 self.reconstructPath(endNode)
 
                 for cord in path:
@@ -375,8 +448,10 @@ class Grid:
     def findPath(self,start,end,path):
         self.start = start
         self.end = end
-        startNode = self.nodes[self.start[0]-1][self.start[1]-1]
-        endNode = self.nodes[self.end[0]-1][self.end[1]-1]
+#         startNode = self.nodes[self.start[0]-1][self.start[1]-1]
+#         endNode = self.nodes[self.end[0]-1][self.end[1]-1]
+        startNode = self.nodes[self.start[0]][self.start[1]]
+        endNode = self.nodes[self.end[0]][self.end[1]]
 
         self.opened = []
         self.closed = []
@@ -392,7 +467,6 @@ class Grid:
 
         # fScore = gScore + hCost but gScore = 0 for first node therefore fScore = hCost = distance from start to end
         startNode.setFScore(self.getDistance(startNode, endNode))
-
         while self.opened:
             # current is an opened node with the lowest fScore
             current = self.opened[0]
@@ -400,26 +474,27 @@ class Grid:
             for node in self.opened:
                 if node.fScore < current.fScore:
                     current = node
-
             if current == endNode:
                 # found the path - display the path
                 path = []
                 node = endNode
-                
+                #print "Code gets stuck in following while loop"
                 while node.getParent():
+                    #print node.getParent()
                     data = (node.getParent().row,node.getParent().column)
+                    #print node.getParent().row,node.getParent().column
                     path.append(data)
                     node = node.getParent()
                 #path.pop()
-                print path
-                
+#                 print path
+                for i in path:
+                    self.routes.append(i)
                 self.reconstructPath(endNode)
                 #print self.AlternatePath(path)
-                print self.findPath(self.start,self.end,path)
-
+#                 print self.findPath(self.start,self.end,path)
+                self.findPath(self.start,self.end,path)
                 for cord in path:
                     self.blocks.remove((cord[0],cord[1]))
-            
                 return(True)
 
             self.opened.remove(current)
@@ -440,7 +515,6 @@ class Grid:
                 neighbour.setParent(current)
                 neighbour.setGScore(tempGScore)
                 neighbour.setFScore(tempGScore + self.getDistance(neighbour, endNode)) # fScore = gScore + hCost
-
         
         return False    # failure to find a path
 
@@ -473,12 +547,27 @@ class Grid:
         
         while current.getParent():
             current.changeColor("black")
-            time.sleep(0.1)
+            global globalTick
+            globalTick += 1
+            self.updateClock(0)
+#             time.sleep(0.005)
             self.window.flush()
             current = current.getParent()
         
         current.changeColor("blue")
         self.window.flush()
+    
+    def showBlocked(self):
+        for m in self.blocks:
+            color = "black"
+            node = Node(m[0]*griDim, m[1]*griDim, griDim, self.window, color, m[0], m[1])
+            node.draw()
+            
+    def showFemtocellRegions(self):
+        for f in self.femtocells:
+            color = "#e0ecf4"
+            node = Node(f[0]*griDim, f[1]*griDim, griDim, self.window, color, f[0], f[1])
+            node.draw()
 
 class Node:
     def __init__(self, x, y, size, window, color, row, column):
@@ -513,17 +602,31 @@ class Node:
         return(self.parent)
 
     def changeColor(self, newColor):
-#         node = Rectangle(Point(self.x, self.y), Point(self.x + self.size, self.y + self.size))
+        xC = self.x/griDim
+        yC = self.y/griDim
+        nodeFlash = Rectangle(Point(self.x, self.y), Point(self.x + self.size, self.y + self.size))
+        if((xC,yC) in Grid.femtocells):
+            nodeFlash.setFill("#ccff00")
+            nodeFlash.draw(self.window)
         node = Circle(Point((2*self.x + self.size)/2, (2*self.y + self.size)/2),3.0)
+        
         node.setFill(newColor)
         node.setOutline(newColor)
         node.draw(self.window)
-
+        time.sleep(0.5)
+        node.undraw()
+        nodeFlash.undraw()
+        
+def generateRandom():
+    return random.randint(0,30)
 
 def main():
+    global globalTime
     # size in terms of # of nodes
     gridWidth = WIDTH
     gridHeight = HEIGHT
+    
+    
     # size of each node in pixels
     nodeSize = 10
     # gap between each node in pixels
@@ -531,8 +634,7 @@ def main():
     # subtracting 5px just makes it look nicer
     screenWidth = (gridWidth * nodeSize) 
     screenHeight = (gridHeight * nodeSize) + ((gridHeight ) * gap) 
-    print screenHeight
-    print screenWidth
+    
     # create window
     window = GraphWin("A* Simulation", WIDTH, HEIGHT, autoflush=False)
     window.setBackground("#636363")
@@ -540,21 +642,63 @@ def main():
 #     window.flush()
 
     grid = Grid(COORDS_X/griDim, COORDS_Y/griDim, griDim, gap, window)
-    #grid.start = (1,5)
-    #grid.end = (30,5)
     grid.draw()
 
-    if grid.findPath((16,13),(1,1),[]):
-        if grid.findPath((20,1),(28,18),[]):
-                if grid.findPath((4,21),(24,1),[]):
-                    if grid.findPath((31,1),(38,10),[]):
+#Simulating pedestrians movement
+
+#     if grid.findPath((16,13),(1,1),[]):
+#     if grid.findPath((20,1),(28,18),[]):
+#     if grid.findPath((4,21),(24,1),[]):
+#     if grid.findPath((31,1),(38,10),[]):
+
+    print grid.srcDest
+    grid.drawClock()
+    
+    if 1:
+        pedestrians = 1
+        while pedestrians > 0:
+            while globalTime < 24:
+                a = generateRandom()
+                b = generateRandom()
+                
+                while(b == a):
+                    b = generateRandom()
+                print a,b
+                
+                st = (int(grid.srcDest[a][0]/griDim),int(grid.srcDest[a][1]/griDim))
+                ds = (int(grid.srcDest[b][0]/griDim), int(grid.srcDest[b][1]/griDim))
+                print st, ds
+                if grid.findPath(st,ds,[]):
                         print("Path Successful")
+                         
+                else:
+                    print("Path Not Found")
+                    for row in grid.nodes:
+                        for node in row:
+                            node.changeColor("red")
+                    window.flush()
+    #             print grid.blocks
+    #             print grid.routes
+    #             
+    #             for x in grid.blocks: 
+    #                 for y in grid.routes:
+    #                     if x == y:
+    #                         print "True"
+    #                         print x
+            globalTime = 0
+            pedestrians -= 1
+    #     grid.showBlocked()
+    #     grid.showFemtocellRegions()
+    #     grid.flushRoutes()
     else:
-        print("Path Not Found")
-        for row in grid.nodes:
-            for node in row:
-                node.changeColor("red")
-        window.flush()
+        if grid.findPath((3,20),(37,10),[]):
+            print("Path Successful")
+        else:
+            print("Path Not Found")
+            for row in grid.nodes:
+                for node in row:
+                    node.changeColor("red")
+            
     window.getMouse();
 
 main()
