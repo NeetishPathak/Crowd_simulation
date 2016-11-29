@@ -3,6 +3,8 @@ import sys
 import math
 import random
 from graphics import *
+import csv
+import operator
 
 globalTime = 0
 globalTick = 0
@@ -51,7 +53,7 @@ class Grid:
         self.blocks = []
         self.poiList = []
         self.srcDest = []
-        self.routes = []
+        self.routes = {}
         self.clock = Rectangle(Point(900,525),Point(900+50,525+50))
         self.timeString = "00:00"
         self.time = Text(self.clock.getCenter(),self.timeString)
@@ -77,7 +79,7 @@ class Grid:
     def updateClock(self,val):
         global globalTick
         global globalTime
-        if globalTick == 12:
+        if globalTick >= 12:
             globalTime += 1
             globalTick = 0
         globalTime += val
@@ -486,15 +488,29 @@ class Grid:
                     path.append(data)
                     node = node.getParent()
                 #path.pop()
-#                 print path
-                for i in path:
-                    self.routes.append(i)
-                self.reconstructPath(endNode)
+                #print path
+                
+                pathtimes = self.reconstructPath(endNode)
+                if (start,end) not in self.routes.keys():
+                    self.routes[(start,end)] = []
+                    self.routes[(start,end)].append([pathtimes])
+                '''
+                else:
+                    self.routes[(start,end)].append([pathtimes])
+                '''
                 #print self.AlternatePath(path)
 #                 print self.findPath(self.start,self.end,path)
-                self.findPath(self.start,self.end,path)
+                #self.findPath(self.start,self.end,path)
                 for cord in path:
-                    self.blocks.remove((cord[0],cord[1]))
+                    if (cord[0],cord[1]) in self.blocks:
+                        self.blocks.remove((cord[0],cord[1]))
+                '''
+                for node in self.closed:
+                    node.parent = None
+                current.parent = None
+                endNode.parent = None
+                '''
+                self.resetNodes()
                 return(True)
 
             self.opened.remove(current)
@@ -515,9 +531,17 @@ class Grid:
                 neighbour.setParent(current)
                 neighbour.setGScore(tempGScore)
                 neighbour.setFScore(tempGScore + self.getDistance(neighbour, endNode)) # fScore = gScore + hCost
-        
+
+        self.resetNodes()
         return False    # failure to find a path
 
+    def resetNodes(self):
+        for row in self.nodes:
+            for node in row:
+                node.parent = None
+                node.fScore = sys.maxsize
+                node.gScore = sys.maxsize
+        
     def getDistance(self, node, endNode):
         xDistance = node.column - endNode.column
         yDistance = node.row - endNode.row
@@ -542,21 +566,46 @@ class Grid:
         return(neighbours)
 
     def reconstructPath(self, endNode):
+        global globalTime
+        if (globalTime > 24):
+            return
+        path =[]
         endNode.changeColor("green")
         current = endNode.getParent()
+        data = (endNode.row,endNode.column,self.getTime(),self.isFemtoCell(endNode.row,endNode.column))
+        path.append(data)
         
-        while current.getParent():
+        while current.getParent() and globalTime < 24:
             current.changeColor("black")
             global globalTick
             globalTick += 1
             self.updateClock(0)
+            data = (current.getParent().row,current.getParent().column,self.getTime(),self.isFemtoCell(current.getParent().row,current.getParent().column))
 #             time.sleep(0.005)
             self.window.flush()
             current = current.getParent()
-        
+            path.append(data)
+
+        data = (current.row,current.column,self.getTime(),self.isFemtoCell(current.row, current.column))
+        path.append(data)
         current.changeColor("blue")
         self.window.flush()
+        return path
     
+    def isFemtoCell(self,row,col):
+        if (row,col) in Grid.femtocells :
+            index = Grid.femtocells.index((row,col))
+            femtoNo = ((int)(index/9) + 1)
+            return femtoNo
+        return 0
+        
+    def getTime(self):
+        global globalTick
+        global globalTime
+
+        minutes = globalTick * 5
+        return str(globalTime) + ':' + str(minutes)
+        
     def showBlocked(self):
         for m in self.blocks:
             color = "black"
@@ -613,15 +662,24 @@ class Node:
         node.setFill(newColor)
         node.setOutline(newColor)
         node.draw(self.window)
-        time.sleep(0.5)
+        time.sleep(0.0001)
         node.undraw()
         nodeFlash.undraw()
         
 def generateRandom():
     return random.randint(0,30)
 
+def expoStochasticVar(iat):
+    
+    rndm = random.random()
+    nxtTime = ((-1) * math.log(rndm))*(iat)
+    #a = "%.2f" % nxtTime
+    return round(nxtTime,2)
+
+
 def main():
     global globalTime
+    global globalTick
     # size in terms of # of nodes
     gridWidth = WIDTH
     gridHeight = HEIGHT
@@ -653,17 +711,36 @@ def main():
 
     print grid.srcDest
     grid.drawClock()
+    out = open('routes.csv','wb')
+    writer = csv.writer(out, delimiter=',')
+    data = [['Simulation','Time','Minutes','xpos','ypos','FemtoCell']]
+    writer.writerows(data)
     
     if 1:
-        pedestrians = 1
+        pedestrians = 10
         while pedestrians > 0:
-            while globalTime < 24:
+            while globalTime < 24: 
                 a = generateRandom()
                 b = generateRandom()
                 
                 while(b == a):
                     b = generateRandom()
                 print a,b
+                '''
+                #depending on time of the day, the rate of movement will be affected
+                #in night time, inter arrival time is 1 hr while in morning it is 15 mins
+                if globalTime >= 18 or globalTime < 6:
+                    randDelay = expoStochasticVar(6)
+                else:
+                    randDelay = expoStochasticVar(1)
+                print " randDelay is  " + str(randDelay)
+                globalTick += (int)(randDelay)
+                
+                if globalTick >= 12:
+                    globalTime += (int)(globalTick)/12
+                    globalTick = globalTick%12
+                    
+                '''
                 
                 st = (int(grid.srcDest[a][0]/griDim),int(grid.srcDest[a][1]/griDim))
                 ds = (int(grid.srcDest[b][0]/griDim), int(grid.srcDest[b][1]/griDim))
@@ -673,9 +750,9 @@ def main():
                          
                 else:
                     print("Path Not Found")
-                    for row in grid.nodes:
-                        for node in row:
-                            node.changeColor("red")
+                    #for row in grid.nodes:
+                     #   for node in row:
+                      #      node.changeColor("red")
                     window.flush()
     #             print grid.blocks
     #             print grid.routes
@@ -686,19 +763,36 @@ def main():
     #                         print "True"
     #                         print x
             globalTime = 0
+            globalTick = 0
+            for keys in grid.routes.keys():
+                for route in grid.routes[keys]:
+                    for y in route:
+                        for x in y:
+                            #out.write(str(pedestrians) + ' ' + str(x[2]) + ' ' + str(x[0]) + ' ' +str(x[1]) + '\n')
+                            timeParts = str(x[2]).split(":")
+                            print timeParts
+                            if int(timeParts[0]) >= 24:
+                                continue
+                            mins = int(timeParts[0])*60 + int(timeParts[1])
+                            data = [[str(pedestrians),str(x[2]),mins,str(x[0]),str(x[1]),str(x[3])]]
+                            writer.writerows(data)
+            grid.routes.clear()
             pedestrians -= 1
+            print pedestrians
     #     grid.showBlocked()
     #     grid.showFemtocellRegions()
     #     grid.flushRoutes()
     else:
-        if grid.findPath((3,20),(37,10),[]):
+        #if grid.findPath((3,20),(37,10),[]):
+        if grid.findPath((0, 0),(26, 18),[]):
             print("Path Successful")
         else:
             print("Path Not Found")
             for row in grid.nodes:
                 for node in row:
                     node.changeColor("red")
-            
+    out.close()
     window.getMouse();
 
 main()
+
