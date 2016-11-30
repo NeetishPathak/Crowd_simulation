@@ -1,3 +1,55 @@
+
+Conversation opened. 1 unread message.
+
+Skip to content
+Using North Carolina State University Mail with screen readers
+Search
+
+
+
+Mail
+COMPOSE
+Labels
+Inbox (822)
+Starred
+Sent Mail
+Drafts (4)
+ECE_Department
+More 
+Hangouts
+
+ 
+ 
+ 
+  More 
+1 of 1,265  
+ 
+Print all In new window
+Data.py 
+Inbox
+x 
+
+Ronak Doshi
+Attachments6:19 AM (5 hours ago)
+
+to me 
+Thanks & Regards,
+
+Ronak Doshi
+Attachments area
+	
+Click here to Reply or Forward
+Using 1.82 GB
+Program Policies
+Powered by Google
+Last account activity: 6 hours ago
+Details
+Ronak Doshi
+Add to circles
+
+Show details
+
+
 import time
 import sys
 import math
@@ -96,3 +148,6 @@ for i in daydata:
 print len(uniquetime)
 print len(usercount)
 
+data.py
+Open with Google Docs
+Displaying data.py.
